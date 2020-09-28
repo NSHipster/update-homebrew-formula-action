@@ -1,5 +1,51 @@
-# Container Action Template
+# Update Homebrew Formula
 
-To get started, click the `Use this template` button on this repository [which will create a new repository based on this template](https://github.blog/2019-06-06-generate-new-repositories-with-repository-templates/).
+Synchronizes a Homebrew formula with a GitHub release.
 
-For info on how to build your first Container action, see the [toolkit docs folder](https://github.com/actions/toolkit/blob/master/docs/container-action.md).
+> 🚧 This action is still in development, and not ready for general use.
+
+## Usage
+
+### Inputs
+
+- `repository`:
+  The project repository (e.g. mona/hello).
+  **Required.**
+- `tap`:
+  The Homebrew tap repository (e.g. mona/homebrew-formulae).
+  **Required.**
+- `formula`:
+  The path to the formula in the tap repository (e.g. Formula/hello.rb).
+  **Required.**
+
+> **Important**:
+> This requires the `GITHUB_TOKEN` environment variable to be set.
+
+### Example Workflow
+
+```yml
+# .github/workflows/release.yml
+name: Release
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  homebrew:
+    name: Update Homebrew formula
+    runs-on: ubuntu-latest
+    steps:
+      - uses: SwiftDocOrg/update-homebrew-formula@main
+        with:
+          repository: mona/hello
+          tap: mona/homebrew-formulae
+          formula: Formula/hello.rb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+## License
+
+MIT

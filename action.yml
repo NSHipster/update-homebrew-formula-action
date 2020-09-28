@@ -1,12 +1,30 @@
-name: 'Container Action Template'
-description: 'Get started with Container actions'
-author: 'GitHub'
-inputs: 
-  myInput:
-    description: 'Input to use'
-    default: 'world'
+name: "Update Homebrew Formula"
+description: "Get started with Container actions"
+
+inputs:
+  repository:
+    description: "The project repository (e.g. mona/hello)"
+    required: true
+  tap:
+    description: "The Homebrew tap repository (e.g. mona/homebrew-formulae)"
+    required: true
+  formula:
+    description: "The path to the formula in the tap repository (e.g. Formula/hello.rb)"
+    required: true
+
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: "docker"
+  image: "Dockerfile"
   args:
-    - ${{ inputs.myInput }}
+    [
+      --repository,
+      "${{ inputs.repository }}",
+      --tap,
+      "${{ inputs.tap }}",
+      --formula,
+      "${{ inputs.formula }}",
+    ]
+
+branding:
+  icon: "upload"
+  color: "yellow"
