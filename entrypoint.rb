@@ -97,12 +97,11 @@ rewriter.transaction do
         %(sha256 "#{checksum}" => :#{platform})
       end
 
-      rewriter.replace bottle.loc.expression, <<~RUBY
+      rewriter.replace bottle.loc.expression, <<-RUBY
         bottle do
             root_url "#{root_url}"
-            #{bottles.join("\n")}
+        #{bottles.map { |s| "    #{s}" }.join("\n")}
         end
-
       RUBY
     end
   end
