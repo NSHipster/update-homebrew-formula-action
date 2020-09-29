@@ -1,6 +1,6 @@
 FROM ruby:2.7-alpine
 
-COPY LICENSE README.md /
+COPY LICENSE.md README.md /
 
 COPY Gemfile Gemfile.lock /
 RUN bundle install -j 8
