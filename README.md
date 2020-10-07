@@ -83,21 +83,6 @@ it updates the formula with a new tag and revision:
 +   url "https://github.com/mona/hello.git", tag: "1.0.1", revision: "5aa05bf843ef74f6c3e5ed6d504d6f305e0945d1"
 ```
 
-For extra credit,
-Mona could extend her workflow to create a release for the new tag
-and build bottles once the formula is updated.
-If that bottle is uploaded as an asset to the corresponding release,
-she could run `update-homebrew-formula-action` again
-to update the formula to include those bottles.
-
-```diff
-+   bottle do
-+     root_url "https://github.com/mona/hello/releases/download/1.0.1"
-+     cellar :any
-+     sha256 "d7493440a64c3a11fac793fb0f28a21e6974e1f430fe246d603496b61a565ae9" => :catalina
-+   end
-```
-
 ## Usage
 
 ### Inputs
@@ -118,7 +103,17 @@ to update the formula to include those bottles.
 > **Important**:
 > This action requires the `GITHUB_TOKEN` environment variable to be set.
 
-### Example Workflow
+### Example Workflows
+
+#### Updating a Homebrew formula in response to creating a new release
+
+We recommend running this action as part of a workflow that triggers on
+[release events](https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows#release)
+with the `created` activity type.
+This way, any release that's created —
+whether manually or programmatically
+(such as with [actions/create-release](https://github.com/actions/create-release)) —
+will benefit from the same automation.
 
 ```yml
 # .github/workflows/release.yml
@@ -130,11 +125,12 @@ on:
       - created
 
 jobs:
-  homebrew:
+  formula:
     name: Update Homebrew formula
     runs-on: ubuntu-latest
     steps:
-      - uses: NSHipster/update-homebrew-formula-action@main
+      - name: Update the Homebrew formula with latest release
+        uses: NSHipster/update-homebrew-formula-action@main
         with:
           repository: mona/hello
           tap: mona/homebrew-formulae
@@ -143,23 +139,102 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-We recommend running this action as part of a workflow that triggers on
-[release events](https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows#release)
-with the `created` activity type.
-This way, any release that's created —
-whether manually or programmatically
-(such as with [actions/create-release](https://github.com/actions/create-release)) —
-will benefit from the same automation.
-
-For a real-world example of this action in use,
-check out the release infrastructure for [swift-doc](https://github.com/SwiftDocOrg/swift-doc).
-
-> **Important**
+> **Important**:
 > A workflow run can trigger other workflow runs
 > _only_ if you use a personal access token other than `GITHUB_TOKEN`.
 > For more information,
 > see "Triggering new workflows using a personal access token"
 > in the [GitHub Actions documentation](https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token).
+
+#### Updating a formula with a bottle
+
+For extra credit,
+you can extend your workflow to create a release for the new tag
+and build bottles once the formula is updated.
+It's a bit involved,
+but your users will appreciate your going the extra mile.
+
+Here's the order of operations:
+
+1. Update the formula for the latest release, like before
+2. Once that's finished,
+   use Homebrew to build a bottle using the updated formula.
+3. Upload the bottle to the release on GitHub
+4. Update the formula again, this time to add the bottle
+
+```yml
+# .github/workflows/release.yml
+name: Release
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  formula:
+    name: Update Homebrew formula
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update the Homebrew formula with latest release
+        uses: NSHipster/update-homebrew-formula-action@main
+        with:
+          repository: mona/hello
+          tap: mona/homebrew-formulae
+          formula: Formula/hello.rb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  bottle:
+    name: Build and distribute Homebrew bottle for macOS Catalina
+    runs-on: macos-10.15
+    needs: [formula]
+    steps:
+      - name: Build a bottle using Homebrew
+        run: |
+          brew tap mona/homebrew-formulae
+          brew install --build-bottle --verbose hello
+          brew bottle hello
+      - name: Upload the bottle to the GitHub release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./hello--${{ github.event.release.tag_name }}.catalina.bottle.tar.gz
+          asset_name: hello-${{ github.event.release.tag_name }}.catalina.bottle.tar.gz
+          asset_content_type: application/gzip
+      - name: Update the Homebrew formula again with bottle
+          uses: NSHipster/update-homebrew-formula-action@main
+          with:
+            repository: mona/hello
+            tap: mona/homebrew-formulae
+            formula: Formula/hello.rb
+            message: |
+                Add bottle for hello ${{ github.event.release.tag_name }}
+                on macOS Catalina
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+> **Note**:
+> Homebrew generates bottles with a double dash (`--`) in the resulting filename,
+> but expects a single dash (`-`) when downloading the bottle.
+
+After running this workflow,
+your formula will have a `bottle` declaration like the following:
+
+```diff
++   bottle do
++     root_url "https://github.com/mona/hello/releases/download/1.0.1"
++     cellar :any
++     sha256 "d7493440a64c3a11fac793fb0f28a21e6974e1f430fe246d603496b61a565ae9" => :catalina
++   end
+```
+
+* * *
+
+For a real-world example of this action in use,
+check out the release infrastructure for [swift-doc](https://github.com/SwiftDocOrg/swift-doc).
 
 ## License
 
