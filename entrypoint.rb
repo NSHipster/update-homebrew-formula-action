@@ -80,9 +80,9 @@ begin
   end
 
   blob = client.contents(options[:tap], path: options[:formula])
-  formula = Base64.decode64(blob.content)
+  original_formula = Base64.decode64(blob.content)
 
-  buffer = Parser::Source::Buffer.new(formula, 1, source: formula)
+  buffer = Parser::Source::Buffer.new(original_formula, 1, source: original_formula)
   builder = RuboCop::AST::Builder.new
   ast = Parser::CurrentRuby.new(builder).parse(buffer)
   rewriter = Parser::Source::TreeRewriter.new(buffer)
@@ -113,25 +113,30 @@ begin
     end
   end
 
-  formula = rewriter.process
+  updated_formula = rewriter.process
   begin
     tempfile = Tempfile.new("#{repo.name}.rb")
-    File.write tempfile, formula
+    File.write tempfile, updated_formula
 
     logger.debug `rubocop -c Homebrew/Library/Homebrew/.rubocop.yml -x #{tempfile.path}`
-    formula = File.read(tempfile)
+    updated_formula = File.read(tempfile)
   ensure
     tempfile.close
     tempfile.unlink
   end
 
-  logger.info formula
+  logger.info updated_formula
 
-  client.update_contents(options[:tap],
-                         options[:formula],
-                         "Update #{repo.name} to #{latest_release.tag_name}",
-                         blob.sha,
-                         formula)
+  if original_formula == updated_formula
+    logger.warn "Formula is up-to-date"
+    exit
+  else
+    client.update_contents(options[:tap],
+                           options[:formula],
+                           "Update #{repo.name} to #{latest_release.tag_name}",
+                           blob.sha,
+                           updated_formula)
+  end
 rescue => e
   logger.fatal(e)
 end
