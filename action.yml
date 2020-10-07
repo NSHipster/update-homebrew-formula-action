@@ -1,5 +1,5 @@
 name: "Update Homebrew Formula"
-description: "Get started with Container actions"
+description: "Synchronizes a Homebrew formula with a GitHub release."
 
 inputs:
   repository:
