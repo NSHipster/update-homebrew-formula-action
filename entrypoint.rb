@@ -18,16 +18,20 @@ options = {}
 OptionParser.new do |opts|
   opts.banner = "Usage: entrypoint.rb [options]"
 
-  opts.on("-r ", "--repository REPOSITORY", "The project repository (e.g. mona/hello)") do |repository|
+  opts.on("-r ", "--repository REPOSITORY", "The project repository") do |repository|
     options[:repository] = repository
   end
 
-  opts.on("-t", "--tap REPOSITORY", "The Homebrew tap repository (e.g. mona/homebrew-formulae)") do |repository|
+  opts.on("-t", "--tap REPOSITORY", "The Homebrew tap repository") do |repository|
     options[:tap] = repository
   end
 
-  opts.on("-f", "--formula PATH", "The path to the formula in the tap repository (e.g. Formula/hello.rb)") do |path|
+  opts.on("-f", "--formula PATH", "The path to the formula in the tap repository") do |path|
     options[:formula] = path
+  end
+
+  opts.on("-m", "--message MESSAGE", "The message of the commit updating the formula") do |message|
+    options[:message] = message
   end
 
   opts.on_tail("-v", "--verbose", "Output more information") do

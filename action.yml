@@ -3,14 +3,27 @@ description: "Synchronizes a Homebrew formula with a GitHub release."
 
 inputs:
   repository:
-    description: "The project repository (e.g. mona/hello)"
+    description: |
+      The project repository
+      (e.g. mona/hello)
     required: true
   tap:
-    description: "The Homebrew tap repository (e.g. mona/homebrew-formulae)"
+    description: |
+      The Homebrew tap repository
+      (e.g. mona/homebrew-formulae)
     required: true
   formula:
-    description: "The path to the formula in the tap repository (e.g. Formula/hello.rb)"
+    description: |
+      The path to the formula in the tap repository
+      (e.g. Formula/hello.rb)
     required: true
+  message:
+    description: |
+      The message of the commit updating the formula.
+      If unspecified, the commit message takes the form
+      "Update {repository name} to #{tag name}"
+      (e.g. "Update hello to 1.0.1")
+    required: false
 
 runs:
   using: "docker"

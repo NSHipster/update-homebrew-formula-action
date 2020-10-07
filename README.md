@@ -103,17 +103,20 @@ to update the formula to include those bottles.
 ### Inputs
 
 - `repository`:
-  **Required.**
+  **Required**.
   The project repository (e.g. mona/hello).
 - `tap`:
-  **Required.**
+  **Required**.
   The Homebrew tap repository (e.g. mona/homebrew-formulae).
 - `formula`:
-  **Required.**
+  **Required**.
   The path to the formula in the tap repository (e.g. Formula/hello.rb).
+- `message`:
+  _Optional_.
+  The message of the commit updating the formula. (e.g. "Update hello to 1.0.1")
 
 > **Important**:
-> This action also requires the `GITHUB_TOKEN` environment variable to be set.
+> This action requires the `GITHUB_TOKEN` environment variable to be set.
 
 ### Example Workflow
 
