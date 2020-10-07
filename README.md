@@ -27,14 +27,9 @@ that she hosts in a repository named `mona/homebrew-formulae`:
 
 ```ruby
 class Hello < Formula
-  desc "Says hello"
+  desc "👋"
   homepage "https://github.com/mona/hello"
   url "https://github.com/mona/hello.git", tag: "1.0.0", revision: "d95b2990f6186523cda25cea4f9d45bc1fde069f"
-
-  bottle do
-    root_url "https://github.com/mona/hello/releases/download/1.0.0"
-    sha256 "12a4ffc9c6a598b554b640d1473a2e413a7802ad5d2fbe79d1b2fbe341d0fb0d" => :catalina
-  end
 
   depends_on xcode: ["12.0", :build]
 
@@ -43,7 +38,7 @@ class Hello < Formula
   end
 
   test do
-    system "#{bin}/hello"
+    system bin/"hello"
   end
 end
 ```
@@ -71,11 +66,37 @@ If she forgets to do all of these steps
 (or makes a mistake),
 her users won't get the latest version when they install `hello`.
 
-* * *
-
 This action automates the manual, error-prone process described above,
 streamlining the release of any tool you distribute via
 your own Homebrew tap.
+
+Let's say Mona tags a new `1.0.1` version
+after setting up a workflow [like the one described below](#usage).
+When `update-homebrew-formula-action` runs,
+it updates the formula with a new tag and revision:
+
+```diff
+  class Hello < Formula
+    desc "👋"
+    homepage "https://github.com/mona/hello"
+-   url "https://github.com/mona/hello.git", tag: "1.0.0", revision: "d95b2990f6186523cda25cea4f9d45bc1fde069f"
++   url "https://github.com/mona/hello.git", tag: "1.0.1", revision: "5aa05bf843ef74f6c3e5ed6d504d6f305e0945d1"
+```
+
+For extra credit,
+Mona could extend her workflow to create a release for the new tag
+and build bottles once the formula is updated.
+If that bottle is uploaded as an asset to the corresponding release,
+she could run `update-homebrew-formula-action` again
+to update the formula to include those bottles.
+
+```diff
++   bottle do
++     root_url "https://github.com/mona/hello/releases/download/1.0.1"
++     cellar :any
++     sha256 "d7493440a64c3a11fac793fb0f28a21e6974e1f430fe246d603496b61a565ae9" => :catalina
++   end
+```
 
 ## Usage
 
@@ -126,6 +147,16 @@ This way, any release that's created —
 whether manually or programmatically
 (such as with [actions/create-release](https://github.com/actions/create-release)) —
 will benefit from the same automation.
+
+For a real-world example of this action in use,
+check out the release infrastructure for [swift-doc](https://github.com/SwiftDocOrg/swift-doc).
+
+> **Important**
+> A workflow run can trigger other workflow runs
+> _only_ if you use a personal access token other than `GITHUB_TOKEN`.
+> For more information,
+> see "Triggering new workflows using a personal access token"
+> in the [GitHub Actions documentation](https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token).
 
 ## License
 
