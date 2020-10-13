@@ -191,7 +191,7 @@ jobs:
     steps:
       - name: Build a bottle using Homebrew
         run: |
-          brew tap mona/homebrew-formulae
+          brew tap mona/formulae
           brew install --build-bottle --verbose hello
           brew bottle hello
       - name: Upload the bottle to the GitHub release
