@@ -204,16 +204,16 @@ jobs:
           asset_name: hello-${{ github.event.release.tag_name }}.catalina.bottle.tar.gz
           asset_content_type: application/gzip
       - name: Update the Homebrew formula again with bottle
-          uses: NSHipster/update-homebrew-formula-action@main
-          with:
-            repository: mona/hello
-            tap: mona/homebrew-formulae
-            formula: Formula/hello.rb
-            message: |
-                Add bottle for hello ${{ github.event.release.tag_name }}
-                on macOS Catalina
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: NSHipster/update-homebrew-formula-action@main
+        with:
+          repository: mona/hello
+          tap: mona/homebrew-formulae
+          formula: Formula/hello.rb
+          message: |
+              Add bottle for hello ${{ github.event.release.tag_name }}
+              on macOS Catalina
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 > **Note**:
