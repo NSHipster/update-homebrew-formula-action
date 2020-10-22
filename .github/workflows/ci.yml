@@ -1,0 +1,19 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Build Docker Image
+        run: docker build --tag update-homebrew-formula-action:latest .
+      - name: Run Docker Image
+        run: docker run update-homebrew-formula-action:latest --help
