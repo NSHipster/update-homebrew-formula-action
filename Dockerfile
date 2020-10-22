@@ -1,10 +1,10 @@
 FROM ruby:2.7-alpine
 
-RUN apk --update add --no-cache --virtual run-dependencies build-base
+RUN apk --update add --no-cache --virtual run-dependencies build-base git
 
 COPY LICENSE.md README.md /
 
-COPY Homebrew /Homebrew
+RUN git clone --depth 1 https://github.com/Homebrew/brew Homebrew
 
 COPY Gemfile /
 RUN bundle install -j 8
