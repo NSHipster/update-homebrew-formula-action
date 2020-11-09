@@ -92,6 +92,10 @@ begin
   rewriter = Parser::Source::TreeRewriter.new(buffer)
 
   rewriter.transaction do
+    if (version = ast.descendants.find { |d| d.send_type? && d.method_name == :version })
+      rewriter.replace version.loc.expression, %Q(version "#{latest_release.tag_name}")
+    end
+
     if (url = ast.descendants.find { |d| d.send_type? && d.method_name == :url })
       rewriter.replace url.loc.expression, %Q(url "#{repo.clone_url}", tag: "#{latest_release.tag_name}", revision: "#{tag.commit.sha}")
     end

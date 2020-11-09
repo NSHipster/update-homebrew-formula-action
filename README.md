@@ -59,8 +59,8 @@ she must do the following:
 - [x] Create a new release on GitHub
 - [x] Build and upload a pre-built binary for the release
 - [x] Calculate the SHA256 checksum for the binary
-- [x] Update the Homebrew formula with the new tag, revision,
-      and asset checksums
+- [x] Update the Homebrew formula with the new
+      version, tag, revision, and asset checksums
 
 If she forgets to do all of these steps
 (or makes a mistake),
@@ -79,6 +79,8 @@ it updates the formula with a new tag and revision:
   class Hello < Formula
     desc "👋"
     homepage "https://github.com/mona/hello"
+-   version "1.0.0"
++   version "1.0.1"
 -   url "https://github.com/mona/hello.git", tag: "1.0.0", revision: "d95b2990f6186523cda25cea4f9d45bc1fde069f"
 +   url "https://github.com/mona/hello.git", tag: "1.0.1", revision: "5aa05bf843ef74f6c3e5ed6d504d6f305e0945d1"
 ```
