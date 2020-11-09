@@ -143,4 +143,5 @@ begin
   end
 rescue => e
   logger.fatal(e)
+  exit 1
 end
