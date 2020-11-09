@@ -45,7 +45,7 @@ OptionParser.new do |opts|
 end.parse!
 
 begin
-  raise "GITHUB_TOKEN environment variable is not set" unless ENV["GITHUB_TOKEN"]
+  raise "GH_PERSONAL_ACCESS_TOKEN environment variable is not set" unless ENV["GH_PERSONAL_ACCESS_TOKEN"]
 
   raise "missing argument: -r/--repository" unless options[:repository]
   raise "missing argument: -t/--tap" unless options[:tap]
@@ -62,7 +62,7 @@ begin
     builder.adapter Faraday.default_adapter
   end
 
-  client = Octokit::Client.new(access_token: ENV["GITHUB_TOKEN"])
+  client = Octokit::Client.new(access_token: ENV["GH_PERSONAL_ACCESS_TOKEN"])
   repo = client.repo(options[:repository])
 
   releases = repo.rels[:releases].get.data

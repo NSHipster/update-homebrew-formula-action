@@ -85,6 +85,48 @@ it updates the formula with a new tag and revision:
 
 ## Usage
 
+### Authentication
+
+This action requires the `GH_PERSONAL_ACCESS_TOKEN` environment variable
+to be set with a [Github personal access token](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token)
+that has "repo" authorization for the repository containing
+the formula you want to update.
+
+> **Important**:
+> GitHub automatically creates a `GITHUB_TOKEN` secret to use in your workflow,
+> but it lacks the permissions necessary to run this action successfully.
+> For more information, see
+> ["Authentication in a workflow"](https://docs.github.com/en/free-pro-team@latest/actions/reference/authentication-in-a-workflow).
+
+To generate one,
+navigate to the [Personal access tokens](https://github.com/settings/tokens) page
+in your GitHub account settings
+(Settings > Developer settings > Personal access tokens)
+and click the "Generate a new token" button.
+
+In the "New personal access token" form,
+provide a descriptive comment in the "Note" field, like "Wiki Management".
+Under "Select scopes",
+enable all of the entries under "repo" perms.
+
+Next,
+click the "Generate token" button at the bottom of the form.
+
+![GitHub Personal Access Token Select Scopes](https://user-images.githubusercontent.com/7659/72726210-9f9a7d80-3b3c-11ea-81b4-528de92fb9fa.png)
+
+Finally,
+copy your generated personal access token to your clipboard
+and navigate to your settings page for your repository or organization.
+Navigate to the "Secrets" page,
+click "Add a new secret",
+and fill in the form by
+entering `GH_PERSONAL_ACCESS_TOKEN` into the "Name" field and
+pasting your token into the "Value" field.
+
+> **Note**:
+> You can use any name for this secret,
+> so long as it's passed to this action as `GH_PERSONAL_ACCESS_TOKEN`.
+
 ### Inputs
 
 - `repository`:
@@ -99,9 +141,6 @@ it updates the formula with a new tag and revision:
 - `message`:
   _Optional_.
   The message of the commit updating the formula. (e.g. "Update hello to 1.0.1")
-
-> **Important**:
-> This action requires the `GITHUB_TOKEN` environment variable to be set.
 
 ### Example Workflows
 
@@ -136,15 +175,8 @@ jobs:
           tap: mona/homebrew-formulae
           formula: Formula/hello.rb
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
 ```
-
-> **Important**:
-> A workflow run can trigger other workflow runs
-> _only_ if you use a personal access token other than `GITHUB_TOKEN`.
-> For more information,
-> see "Triggering new workflows using a personal access token"
-> in the [GitHub Actions documentation](https://docs.github.com/en/free-pro-team@latest/actions/reference/events-that-trigger-workflows#triggering-new-workflows-using-a-personal-access-token).
 
 #### Updating a formula with a bottle
 
@@ -183,7 +215,7 @@ jobs:
           tap: mona/homebrew-formulae
           formula: Formula/hello.rb
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
   bottle:
     name: Build and distribute Homebrew bottle for macOS Catalina
     runs-on: macos-10.15
@@ -197,7 +229,7 @@ jobs:
       - name: Upload the bottle to the GitHub release
         uses: actions/upload-release-asset@v1.0.1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./hello--${{ github.event.release.tag_name }}.catalina.bottle.tar.gz
@@ -213,7 +245,7 @@ jobs:
               Add bottle for hello ${{ github.event.release.tag_name }}
               on macOS Catalina
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
 ```
 
 > **Note**:
