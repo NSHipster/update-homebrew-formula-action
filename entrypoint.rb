@@ -122,7 +122,7 @@ begin
     tempfile = Tempfile.new("#{repo.name}.rb")
     File.write tempfile, updated_formula
 
-    logger.debug `rubocop -c Homebrew/Library/Homebrew/.rubocop.yml -x #{tempfile.path}`
+    logger.debug `rubocop -c Homebrew/Library/.rubocop.yml -x #{tempfile.path}`
     updated_formula = File.read(tempfile)
   ensure
     tempfile.close
