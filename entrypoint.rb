@@ -40,7 +40,7 @@ OptionParser.new do |opts|
 
   opts.on_tail("-h", "--help", "Display this screen") do
     puts opts
-    exit
+    exit 0
   end
 end.parse!
 
@@ -133,7 +133,7 @@ begin
 
   if original_formula == updated_formula
     logger.warn "Formula is up-to-date"
-    exit
+    exit 0
   else
     client.update_contents(options[:tap],
                            options[:formula],
