@@ -206,22 +206,21 @@ on:
       - created
 
 jobs:
-  formula:
-    name: Update Homebrew formula
+  update_formula_version:
+    name: Update the Homebrew formula with latest release
     runs-on: ubuntu-latest
     steps:
-      - name: Update the Homebrew formula with latest release
-        uses: NSHipster/update-homebrew-formula-action@main
+      - uses: NSHipster/update-homebrew-formula-action@main
         with:
           repository: mona/hello
           tap: mona/homebrew-formulae
           formula: Formula/hello.rb
         env:
           GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
-  bottle:
+  upload_bottle:
     name: Build and distribute Homebrew bottle for macOS Catalina
     runs-on: macos-10.15
-    needs: [formula]
+    needs: [update_formula_version]
     steps:
       - name: Build a bottle using Homebrew
         run: |
@@ -237,8 +236,12 @@ jobs:
           asset_path: ./hello--${{ github.event.release.tag_name }}.catalina.bottle.tar.gz
           asset_name: hello-${{ github.event.release.tag_name }}.catalina.bottle.tar.gz
           asset_content_type: application/gzip
-      - name: Update the Homebrew formula again with bottle
-        uses: NSHipster/update-homebrew-formula-action@main
+  update_formula_bottle:
+    name: Update the Homebrew formula again with bottle
+    runs-on: ubuntu-latest
+    needs: [upload_bottle]
+    steps:
+      - uses: NSHipster/update-homebrew-formula-action@main
         with:
           repository: mona/hello
           tap: mona/homebrew-formulae
