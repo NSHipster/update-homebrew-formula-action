@@ -73,12 +73,20 @@ begin
     raise "Tag #{latest_release.tag_name} not found"
   end
 
-  PATTERN = /#{Regexp.quote(repo.name)}-#{Regexp.quote(latest_release.tag_name.delete_prefix("v"))}\.(?<platform>[^.]+)\.bottle\.tar\.gz/.freeze
+  PATTERN = /#{Regexp.quote(repo.name)}-#{Regexp.quote(latest_release.tag_name.delete_prefix("v"))}\.(?<platform>[^.]+)\.bottle\.((?<rebuild>[\d]+)\.)?tar\.gz/.freeze
 
   assets = {}
+  rebuild = nil
   latest_release.assets.each do |asset|
     next unless (matches = asset.name.match(PATTERN))
     next unless (platform = matches[:platform])
+
+    if rebuild && matches[:rebuild] && rebuild != matches[:rebuild]
+        logger.warn "Rebuild number for #{platform} (#{matches[:rebuild]}) doesn't match previously declared value (#{rebuild}), ignoring"
+    else
+        logger.info "Found rebuild number #{matches[:rebuild]} for #{platform}"
+        rebuild = rebuild || matches[:rebuild]
+    end
 
     assets[platform] = Digest::SHA256.hexdigest(client.get(asset.browser_download_url))
   end
@@ -114,7 +122,8 @@ begin
           bottle do
               root_url "#{root_url}"
               cellar :any
-          #{bottles.map { |s| "    #{s}" }.join("\n")}
+              #{"rebuild #{rebuild}\n" if rebuild}
+              #{bottles.join("\n")}
             end
         RUBY
       end
