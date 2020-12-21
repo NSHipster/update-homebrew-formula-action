@@ -73,7 +73,7 @@ begin
     raise "Tag #{latest_release.tag_name} not found"
   end
 
-  PATTERN = /#{Regexp.quote(repo.name)}-#{Regexp.quote(latest_release.tag_name)}\.(?<platform>[^.]+)\.bottle\.((?<rebuild>[\d]+)\.)?tar\.gz/.freeze
+  PATTERN = /#{Regexp.quote(repo.name)}-#{Regexp.quote(latest_release.tag_name.delete_prefix("v"))}\.(?<platform>[^.]+)\.bottle\.((?<rebuild>[\d]+)\.)?tar\.gz/.freeze
 
   assets = {}
   rebuild = nil
