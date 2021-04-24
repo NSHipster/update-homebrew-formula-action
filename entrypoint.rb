@@ -82,10 +82,10 @@ begin
     next unless (platform = matches[:platform])
 
     if rebuild && matches[:rebuild] && rebuild != matches[:rebuild]
-        logger.warn "Rebuild number for #{platform} (#{matches[:rebuild]}) doesn't match previously declared value (#{rebuild}), ignoring"
+      logger.warn "Rebuild number for #{platform} (#{matches[:rebuild]}) doesn't match previously declared value (#{rebuild}), ignoring"
     else
-        logger.info "Found rebuild number #{matches[:rebuild]} for #{platform}"
-        rebuild = rebuild || matches[:rebuild]
+      logger.info "Found rebuild number #{matches[:rebuild]} for #{platform}"
+      rebuild = rebuild || matches[:rebuild]
     end
 
     assets[platform] = Digest::SHA256.hexdigest(client.get(asset.browser_download_url))
@@ -105,7 +105,8 @@ begin
     end
 
     if (url = ast.descendants.find { |d| d.send_type? && d.method_name == :url })
-      rewriter.replace url.loc.expression, %Q(url "#{repo.clone_url}", tag: "#{latest_release.tag_name}", revision: "#{tag.commit.sha}")
+      rewriter.replace url.loc.expression,
+                       %Q(url "#{repo.clone_url}", tag: "#{latest_release.tag_name}", revision: "#{tag.commit.sha}")
     end
 
     if (bottle = ast.descendants.find { |d| d.block_type? && d.send_node&.method_name == :bottle })
