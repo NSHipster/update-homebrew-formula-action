@@ -112,13 +112,12 @@ begin
     root_url = "https://github.com/#{repo.owner.login}/#{repo.name}/releases/download/#{latest_release.tag_name}"
 
     bottles = assets.map do |platform, checksum|
-      %Q(sha256 "#{checksum}" => :#{platform})
+      %Q(sha256 cellar: :any, #{platform}: "#{checksum}")
     end
 
     bottle_expression = <<~RUBY
       bottle do
           root_url "#{root_url}"
-          cellar :any
           #{"rebuild #{rebuild}\n" if rebuild}
           #{bottles.join("\n    ")}
         end
