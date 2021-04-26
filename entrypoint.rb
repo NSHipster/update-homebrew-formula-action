@@ -109,25 +109,29 @@ begin
                        %Q(url "#{repo.clone_url}", tag: "#{latest_release.tag_name}", revision: "#{tag.commit.sha}")
     end
 
+    root_url = "https://github.com/#{repo.owner.login}/#{repo.name}/releases/download/#{latest_release.tag_name}"
+
+    bottles = assets.map do |platform, checksum|
+      %Q(sha256 "#{checksum}" => :#{platform})
+    end
+
+    bottle_expression = <<~RUBY
+      bottle do
+          root_url "#{root_url}"
+          cellar :any
+          #{"rebuild #{rebuild}\n" if rebuild}
+          #{bottles.join("\n    ")}
+        end
+    RUBY
+
     if (bottle = ast.descendants.find { |d| d.block_type? && d.send_node&.method_name == :bottle })
       if assets.empty?
         rewriter.replace bottle.loc.expression, ""
       else
-        root_url = "https://github.com/#{repo.owner.login}/#{repo.name}/releases/download/#{latest_release.tag_name}"
-
-        bottles = assets.map do |platform, checksum|
-          %Q(sha256 "#{checksum}" => :#{platform})
-        end
-
-        rewriter.replace bottle.loc.expression, <<~RUBY
-          bottle do
-              root_url "#{root_url}"
-              cellar :any
-              #{"rebuild #{rebuild}\n" if rebuild}
-              #{bottles.join("\n")}
-            end
-        RUBY
+        rewriter.replace bottle.loc.expression, bottle_expression
       end
+    elsif assets.any? && (url = ast.descendants.find { |d| d.send_type? && d.method_name == :url })
+      rewriter.insert_after url.loc.expression, "\n\n#{bottle_expression}"
     end
   end
 
