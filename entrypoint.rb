@@ -116,9 +116,9 @@ begin
     end
 
     bottle_expression = <<~RUBY
-      bottle do
+        bottle do
           root_url "#{root_url}"
-          #{"rebuild #{rebuild}\n" if rebuild}
+    #{"      rebuild #{rebuild}\n" if rebuild}
           #{bottles.join("\n    ")}
         end
     RUBY
@@ -139,7 +139,7 @@ begin
     tempfile = Tempfile.new("#{repo.name}.rb")
     File.write tempfile, updated_formula
 
-    logger.debug `rubocop -c Homebrew/Library/.rubocop.yml -x #{tempfile.path}`
+    logger.debug `rubocop -c Library/.rubocop.yml -x #{tempfile.path}`
     updated_formula = File.read(tempfile)
   ensure
     tempfile.close
