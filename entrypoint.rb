@@ -154,7 +154,7 @@ begin
   else
     client.update_contents(options[:tap],
                            options[:formula],
-                           "Update #{repo.name} to #{latest_release.tag_name}",
+                           options[:message] ? options[:message] : "Update #{repo.name} to #{latest_release.tag_name}",
                            blob.sha,
                            updated_formula)
   end
