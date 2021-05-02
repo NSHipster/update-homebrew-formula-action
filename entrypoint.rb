@@ -31,7 +31,7 @@ OptionParser.new do |opts|
   end
 
   opts.on("-m", "--message MESSAGE", "The message of the commit updating the formula") do |message|
-    options[:message] = message
+    options[:message] = message.strip
   end
 
   opts.on_tail("-v", "--verbose", "Output more information") do
@@ -117,10 +117,10 @@ begin
 
     bottle_expression = <<~RUBY
       bottle do
-          root_url "#{root_url}"
-          #{"rebuild #{rebuild}\n" if rebuild}
-          #{bottles.join("\n    ")}
-        end
+        root_url "#{root_url}"
+  #{"      rebuild #{rebuild}" if rebuild}
+        #{bottles.join("\n    ")}
+      end
     RUBY
 
     if (bottle = ast.descendants.find { |d| d.block_type? && d.send_node&.method_name == :bottle })
@@ -129,8 +129,12 @@ begin
       else
         rewriter.replace bottle.loc.expression, bottle_expression
       end
-    elsif assets.any? && (url = ast.descendants.find { |d| d.send_type? && d.method_name == :url })
-      rewriter.insert_after url.loc.expression, "\n\n#{bottle_expression}"
+    elsif assets.any?
+      for node_name in %i[license url] do      
+        (insert_after = ast.descendants.find { |d| d.send_type? && d.method_name == node_name })
+        rewriter.insert_after insert_after.loc.expression, "\n\n#{bottle_expression}"
+        break
+      end
     end
   end
 
@@ -139,7 +143,9 @@ begin
     tempfile = Tempfile.new("#{repo.name}.rb")
     File.write tempfile, updated_formula
 
-    logger.debug `rubocop -c Homebrew/Library/.rubocop.yml -x #{tempfile.path}`
+    rubocop_config = "/Homebrew/Library/.rubocop.yml"
+    raise "Can't find rubocop config: #{rubocop_config}" unless File.exist?(rubocop_config)
+    logger.debug `rubocop -c #{rubocop_config} -x #{tempfile.path}`
     updated_formula = File.read(tempfile)
   ensure
     tempfile.close
@@ -152,9 +158,11 @@ begin
     logger.warn "Formula is up-to-date"
     exit 0
   else
+    commit_message = options[:message].empty? ? "Update #{repo.name} to #{latest_release.tag_name}" : options[:message]
+    logger.info commit_message
     client.update_contents(options[:tap],
                            options[:formula],
-                           "Update #{repo.name} to #{latest_release.tag_name}",
+                           commit_message,
                            blob.sha,
                            updated_formula)
   end
