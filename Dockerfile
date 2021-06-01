@@ -4,8 +4,7 @@ RUN apk --update add --no-cache --virtual run-dependencies build-base git
 
 COPY LICENSE.md README.md /
 
-RUN git clone --depth 1 https://github.com/NSHipster/homebrew Homebrew
-COPY Homebrew /
+RUN git clone --depth 1 --branch 3.1.5 https://github.com/Homebrew/brew Homebrew
 
 COPY Gemfile /
 RUN bundle install -j 8
