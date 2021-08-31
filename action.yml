@@ -17,6 +17,11 @@ inputs:
       The path to the formula in the tap repository
       (e.g. Formula/hello.rb)
     required: true
+  name:
+    description: |
+      The name of the homebrew formula. Defaults to the repository name
+      (e.g. hello)
+    required: false
   message:
     description: |
       The message of the commit updating the formula.
@@ -38,6 +43,8 @@ runs:
       "${{ inputs.formula }}",
       --message,
       "${{ inputs.message }}",
+      --name,
+      "${{ inputs.name }}",
     ]
 
 branding:
