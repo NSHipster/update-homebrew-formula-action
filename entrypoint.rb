@@ -26,6 +26,10 @@ OptionParser.new do |opts|
     options[:tap] = repository
   end
 
+  opts.on("-n", "--name NAME", "The name of the formula in Homebrew") do |repository|
+    options[:name] = repository
+  end
+
   opts.on("-f", "--formula PATH", "The path to the formula in the tap repository") do |path|
     options[:formula] = path
   end
@@ -73,7 +77,11 @@ begin
     raise "Tag #{latest_release.tag_name} not found"
   end
 
-  PATTERN = /#{Regexp.quote(repo.name)}-#{Regexp.quote(latest_release.tag_name.delete_prefix("v"))}\.(?<platform>[^.]+)\.bottle\.((?<rebuild>[\d]+)\.)?tar\.gz/.freeze
+  formula_name = repo.name
+  if options[:name]
+    formula_name = options[:name]
+  end
+  PATTERN = /#{Regexp.quote(formula_name)}-#{Regexp.quote(latest_release.tag_name.delete_prefix("v"))}\.(?<platform>[^.]+)\.bottle\.((?<rebuild>[\d]+)\.)?tar\.gz/.freeze
 
   assets = {}
   rebuild = nil
@@ -158,7 +166,7 @@ begin
     logger.warn "Formula is up-to-date"
     exit 0
   else
-    commit_message = options[:message].empty? ? "Update #{repo.name} to #{latest_release.tag_name}" : options[:message]
+    commit_message = options[:message].empty? ? "Update #{formula_name} to #{latest_release.tag_name}" : options[:message]
     logger.info commit_message
     client.update_contents(options[:tap],
                            options[:formula],
