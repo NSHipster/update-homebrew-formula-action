@@ -140,6 +140,9 @@ pasting your token into the "Value" field.
 - `formula`:
   **Required**.
   The path to the formula in the tap repository (e.g. Formula/hello.rb).
+- `name`:
+  _Optional_.
+  Overrides the name of the formula, if it differs from the github repository (eg. hello); if not sets, defaults to the repository name
 - `message`:
   _Optional_.
   The message of the commit updating the formula. (e.g. "Update hello to 1.0.1")
@@ -233,6 +236,7 @@ jobs:
           GH_PERSONAL_ACCESS_TOKEN: ${{ secrets.GH_PERSONAL_ACCESS_TOKEN }}
         with:
           upload_url: ${{ github.event.release.upload_url }}
+          #Note: When using `name` to override the formula name, you need to also use it here (where it says "hello" here)
           asset_path: ./hello--${{ github.event.release.tag_name }}.catalina.bottle.tar.gz
           asset_name: hello-${{ github.event.release.tag_name }}.catalina.bottle.tar.gz
           asset_content_type: application/gzip
